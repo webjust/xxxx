@@ -476,7 +476,7 @@ EOT;
                 'scene' => array('scene_id' => 777)
             )
         );
-        $qrTicket = $this->getData($url, 'POST', $this->jsonToArray($postStr));
+        $qrTicket = $this->getData($url, 'POST', json_encode($postStr));
         return $qrTicket;
     }
 }
