@@ -1,4 +1,5 @@
 <?php
+
 class wxModel
 {
     public $appid = "wx542c11817c22d123";
@@ -180,8 +181,7 @@ EOT;
             if ($msgtype == 'event') {
                 $event = $postObj->Event;
                 // 订阅事件
-                if ($event == 'subscribe')
-                {
+                if ($event == 'subscribe') {
                     // 订阅后，发送的文本消息
                     $textTpl = "<xml>
                             <ToUserName><![CDATA[%s]]></ToUserName>
@@ -200,8 +200,7 @@ EOT;
                 }
 
                 // 点击菜单的时间推送
-                if ($event == 'CLICK')
-                {
+                if ($event == 'CLICK') {
                     // 判断到底是哪一个菜单
                     $key = $postObj->EventKey;
 
@@ -309,7 +308,7 @@ EOT;
     /*
      * curl请求，获取返回的数据
      * */
-    public function getData($url, $method='GET', $arr='')
+    public function getData($url, $method = 'GET', $arr = '')
     {
         // 1. cURL初始化
         $ch = curl_init();
@@ -346,18 +345,18 @@ EOT;
         return $arr;
     }
 
-    public function getAccessToken(){
+    public function getAccessToken()
+    {
         // redis  memcache SESSION
         session_start();
 
-        if (isset($_SESSION['access_token']) && (time()-$_SESSION['expire_time']) < 7000 )
-        {
+        if (isset($_SESSION['access_token']) && (time() - $_SESSION['expire_time']) < 7000) {
             return $_SESSION['access_token'];
         } else {
             $appid = "wx542c11817c22d123";
             $appsecret = "8b2d7aac7d5dc87173bc62a429545e18";
 
-            $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=".$appid."&secret=".$appsecret;
+            $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" . $appid . "&secret=" . $appsecret;
             $access_token = $this->jsonToArray($this->getData($url))['access_token'];
 
             // 写入SESSION
@@ -371,13 +370,13 @@ EOT;
     {
         $appkey = '3d92eb3623d5cc1ec6c85f596cc58054';
         // url
-        $url = "http://v.juhe.cn/weather/index?format=2&cityname=".$city."&key=".$appkey;
+        $url = "http://v.juhe.cn/weather/index?format=2&cityname=" . $city . "&key=" . $appkey;
         return $this->getData($url);
     }
 
     public function getUserOpenIdList()
     {
-        $url = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=".$this->getAccessToken();
+        $url = "https://api.weixin.qq.com/cgi-bin/user/get?access_token=" . $this->getAccessToken();
         return $this->getData($url);
     }
 
@@ -390,14 +389,14 @@ EOT;
 
         // $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $appid . "&redirect_uri=" . $redirect_uri . "&response_type=" . $response_type . "&scope=" . $scope . "&state=STATE#wechat_redirect";
 
-        $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".$appid."&redirect_uri=".$redirect_uri."&response_type=code&scope=".$scope."&state=STATE#wechat_redirect";
+        $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" . $appid . "&redirect_uri=" . $redirect_uri . "&response_type=code&scope=" . $scope . "&state=STATE#wechat_redirect";
         header('location:' . $url);
         // return $url;
     }
 
     public function geiIp()
     {
-        $url = "https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=".$this->getAccessToken();
+        $url = "https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=" . $this->getAccessToken();
         return $this->getData($url);
     }
 
@@ -414,7 +413,7 @@ EOT;
         $secret = $this->appsecret;
         $code = $_GET['code'];
 
-        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=".$appid."&secret=".$secret."&code=".$code."&grant_type=authorization_code";
+        $url = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=" . $appid . "&secret=" . $secret . "&code=" . $code . "&grant_type=authorization_code";
 
         $web_access_token_arr = $this->getData($url);
         $web_access_token = $this->jsonToArray($web_access_token_arr)['access_token'];
@@ -426,7 +425,7 @@ EOT;
         lang    返回国家地区语言版本，zh_CN 简体，zh_TW 繁体，en 英语
          */
         $openid = $this->jsonToArray($web_access_token_arr)['openid'];
-        $url = "https://api.weixin.qq.com/sns/userinfo?access_token=".$web_access_token."&openid=".$openid."&lang=zh_CN";
+        $url = "https://api.weixin.qq.com/sns/userinfo?access_token=" . $web_access_token . "&openid=" . $openid . "&lang=zh_CN";
         $userinfo = $this->jsonToArray($this->getData($url));
         return $userinfo;
     }
@@ -461,7 +460,23 @@ EOT;
            }
         }
 EOT;
-        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$this->getAccessToken();
+        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=" . $this->getAccessToken();
         echo $this->getData($url, 'POST', $json);
+    }
+
+    public function getQrCode()
+    {
+        $access_token = $this->getAccessToken();
+        $url = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=" . $access_token;
+        // 临时二维码POST数据
+        $postStr = array(
+            'expire_seconds' => 2592000,
+            'action_name' => 'QR_SCENE',
+            'action_info' => array(
+                'scene' => array('scene_id' => 777)
+            )
+        );
+        $qrTicket = $this->getData($url, 'POST', $this->jsonToArray($postStr));
+        return $qrTicket;
     }
 }
