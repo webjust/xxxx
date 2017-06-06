@@ -233,6 +233,27 @@ EOT;
                     $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
                     echo $retStr;
                 }
+
+                // 扫描二维码
+                if ($event == 'SCAN') {
+//                    <EventKey><![CDATA[777]]></EventKey>
+                    $key = $postObj->EventKey;
+                    if ($key == 777) {
+                        $textTpl = "<xml>
+                            <ToUserName><![CDATA[%s]]></ToUserName>
+                            <FromUserName><![CDATA[%s]]></FromUserName>
+                            <CreateTime>%s</CreateTime>
+                            <MsgType><![CDATA[%s]]></MsgType>
+                            <Content><![CDATA[%s]]></Content>
+                            <FuncFlag>0</FuncFlag>
+                            </xml>";
+                        $time = time();
+                        $msgtype = 'text';
+                        $content = '<a href="http://qq.bls666.club/demo.php">注册一下</a>';
+                        $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                        echo $retStr;
+                    }
+                }
             }
 
             $time = time();
