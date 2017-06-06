@@ -175,6 +175,23 @@ EOT;
                     $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
                     echo $retStr;
                 }
+
+                if ($keyword == '分享') {
+                    // 发送天气的消息
+                    $textTpl = "<xml>
+                            <ToUserName><![CDATA[%s]]></ToUserName>
+                            <FromUserName><![CDATA[%s]]></FromUserName>
+                            <CreateTime>%s</CreateTime>
+                            <MsgType><![CDATA[%s]]></MsgType>
+                            <Content><![CDATA[%s]]></Content>
+                            <FuncFlag>0</FuncFlag>
+                            </xml>";
+                    $time = time();
+                    $msgtype = 'text';
+                    $content = '<a href="http://qq.bls666.club/share.php">分享</a>';
+                    $retStr = sprintf($textTpl, $fromusername, $tousername, $time, $msgtype, $content);
+                    echo $retStr;
+                }
             }
 
             // 判断是否发生了事件推送
