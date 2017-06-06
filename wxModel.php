@@ -476,7 +476,12 @@ EOT;
                 'scene' => array('scene_id' => 777)
             )
         );
-        $qrTicket = $this->getData($url, 'POST', json_encode($postStr));
-        return $qrTicket;
+        // 获取Ticket值
+        $qrTicketJson = $this->getData($url, 'POST', json_encode($postStr));
+        $qrTicket = $this->jsonToArray($qrTicketJson)['ticket'];
+
+        // 使用Ticket获取二维码
+        $qrImgUrl = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=".urlencode($qrTicket);
+        echo "<img src='".$qrImgUrl."' />"
     }
 }
