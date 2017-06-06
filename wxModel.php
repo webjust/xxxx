@@ -482,6 +482,6 @@ EOT;
 
         // 使用Ticket获取二维码
         $qrImgUrl = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=".urlencode($qrTicket);
-        echo "<img src='".$qrImgUrl."' />"
+        echo "<img src='".$qrImgUrl."' />";
     }
 }
