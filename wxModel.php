@@ -502,7 +502,53 @@ EOT;
         $qrTicket = $this->jsonToArray($qrTicketJson)['ticket'];
 
         // 使用Ticket获取二维码
-        $qrImgUrl = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=".urlencode($qrTicket);
-        echo "<img src='".$qrImgUrl."' />";
+        $qrImgUrl = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=" . urlencode($qrTicket);
+        echo "<img src='" . $qrImgUrl . "' />";
+    }
+
+    /*
+     * 生成签名的随机串
+     * */
+    public function createNonceStr($length = 16)
+    {
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $str = "";
+        for ($i = 0; $i < $length; $i++) {
+            $str .= substr($chars, mt_rand(0, strlen($chars) - 1), 1);
+        }
+        return $str;
+    }
+
+
+    private function getJsApiTicket()
+    {
+        // jsapi_ticket 应该全局存储与更新，以下代码以写入到文件中做示例
+        $data = json_decode($this->get_php_file("jsapi_ticket.php"));
+        if ($data->expire_time < time()) {
+            $accessToken = $this->getAccessToken();
+            // 如果是企业号用以下 URL 获取 ticket
+            // $url = "https://qyapi.weixin.qq.com/cgi-bin/get_jsapi_ticket?access_token=$accessToken";
+            $url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?type=jsapi&access_token=$accessToken";
+            $res = json_decode($this->getData($url));
+            $ticket = $res->ticket;
+            if ($ticket) {
+                $data->expire_time = time() + 7000;
+                $data->jsapi_ticket = $ticket;
+                $this->set_php_file("jsapi_ticket.php", json_encode($data));
+            }
+        } else {
+            $ticket = $data->jsapi_ticket;
+        }
+
+        return $ticket;
+    }
+
+    private function get_php_file($filename) {
+        return trim(substr(file_get_contents($filename), 15));
+    }
+    private function set_php_file($filename, $content) {
+        $fp = fopen($filename, "w");
+        fwrite($fp, "<?php exit();?>" . $content);
+        fclose($fp);
     }
 }
